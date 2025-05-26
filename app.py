@@ -42,5 +42,13 @@ def formulario():
 
     return render_template('formulario.html')
 
+@app.route('/reservas')
+def ver_reservas():
+    session = Session()
+    reservas = session.query(Reserva).all()
+    session.close()
+    return render_template('reservas.html', reservas=reservas)
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=10000)

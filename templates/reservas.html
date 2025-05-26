@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reservas guardadas</title>
+</head>
+<body>
+    <h2>Lista de Reservas</h2>
+    <table border="1">
+        <tr>
+            <th>Nombre</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Correo</th>
+        </tr>
+        {% for r in reservas %}
+        <tr>
+            <td>{{ r.nombre }}</td>
+            <td>{{ r.fecha }}</td>
+            <td>{{ r.hora }}</td>
+            <td>{{ r.correo }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
