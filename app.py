@@ -45,13 +45,13 @@ def formulario():
 
     return render_template('formulario.html')
 
-# Nueva ruta para mostrar todas las reservas guardadas
 @app.route('/reservas')
 def ver_reservas():
     session = Session()
-    reservas = session.query(Reserva).all()
+    reservas = session.query(Reserva).order_by(Reserva.fecha, Reserva.hora).all()
     session.close()
     return render_template('reservas.html', reservas=reservas)
+
 
 # Inicia la app
 if __name__ == '__main__':
