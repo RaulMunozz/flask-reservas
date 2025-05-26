@@ -6,13 +6,14 @@ import os
 
 app = Flask(__name__)
 
-# Carga la URL de la base de datos desde una variable de entorno
+# URL de la base de datos PostgreSQL desde las variables de entorno de Render
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 # Configura la conexión a PostgreSQL
 engine = create_engine(DATABASE_URL, echo=True)
 Base = declarative_base()
 
+# Define el modelo de la tabla
 class Reserva(Base):
     __tablename__ = 'reservas'
     id = Column(Integer, primary_key=True)
@@ -21,9 +22,11 @@ class Reserva(Base):
     hora = Column(String)
     correo = Column(String)
 
+# Crea la tabla si no existe
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
+# Página principal con formulario
 @app.route('/', methods=['GET', 'POST'])
 def formulario():
     if request.method == 'POST':
@@ -42,6 +45,7 @@ def formulario():
 
     return render_template('formulario.html')
 
+# Nueva ruta para mostrar todas las reservas guardadas
 @app.route('/reservas')
 def ver_reservas():
     session = Session()
@@ -49,6 +53,6 @@ def ver_reservas():
     session.close()
     return render_template('reservas.html', reservas=reservas)
 
-
+# Inicia la app
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=10000)
