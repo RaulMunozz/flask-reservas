@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from datetime import datetime
 import sqlite3
+import os
 
 app = Flask(__name__)
 app.secret_key = 'clave-secreta'
 
-# Configuración del admin (puedes cambiar estos valores)
 ADMIN_USER = 'admin'
 ADMIN_PASSWORD = '1234'
 
@@ -16,6 +16,7 @@ def get_db_connection():
 
 @app.template_filter('todatetime')
 def todatetime(value):
+    # Solo aceptamos fecha y hora. Si no tiene hora, fallará.
     return datetime.strptime(value, "%Y-%m-%d %H:%M")
 
 @app.route('/', methods=['GET', 'POST'])
@@ -87,7 +88,5 @@ def mostrar_reservas():
     return render_template('reservas.html', reservas=reservas, ahora=ahora)
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
-
