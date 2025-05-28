@@ -9,7 +9,6 @@
     <div class="container">
         <h1 class="mb-4">Formulario de Reserva</h1>
 
-        <!-- Mensajes flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             {% for category, message in messages %}
@@ -32,6 +31,7 @@
                 <input type="time" class="form-control" id="hora" name="hora" required>
             </div>
             <button type="submit" class="btn btn-primary">Reservar</button>
+            <a href="/login" class="btn btn-outline-secondary ms-2">Iniciar sesión</a>
         </form>
     </div>
 </body>

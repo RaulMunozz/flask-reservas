@@ -1,22 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from datetime import datetime
 import sqlite3
 
 app = Flask(__name__)
-app.secret_key = 'clave-secreta'  # Necesaria para mensajes flash
+app.secret_key = 'clave-secreta'
 
-# Conexión a la base de datos SQLite
+# Configuración del admin (puedes cambiar estos valores)
+ADMIN_USER = 'admin'
+ADMIN_PASSWORD = '1234'
+
 def get_db_connection():
     conn = sqlite3.connect('reservas.db')
     conn.row_factory = sqlite3.Row
     return conn
 
-# Filtro para convertir texto a datetime
 @app.template_filter('todatetime')
 def todatetime(value):
     return datetime.strptime(value, "%Y-%m-%d %H:%M")
 
-# Página principal con formulario
 @app.route('/', methods=['GET', 'POST'])
 def reservar():
     if request.method == 'POST':
@@ -38,7 +39,6 @@ def reservar():
             flash("No puedes reservar en una fecha pasada.", "danger")
             return redirect(url_for('reservar'))
 
-        # Guardar la reserva en un solo campo de fecha completa
         conn = get_db_connection()
         conn.execute(
             'INSERT INTO reservas (nombre, fecha) VALUES (?, ?)',
@@ -52,9 +52,34 @@ def reservar():
 
     return render_template('formulario.html')
 
-# Página que muestra todas las reservas
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        usuario = request.form['usuario']
+        password = request.form['password']
+
+        if usuario == ADMIN_USER and password == ADMIN_PASSWORD:
+            session['admin'] = True
+            flash("Has iniciado sesión como administrador.", "success")
+            return redirect(url_for('mostrar_reservas'))
+        else:
+            flash("Credenciales incorrectas.", "danger")
+            return redirect(url_for('login'))
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('admin', None)
+    flash("Sesión cerrada.", "info")
+    return redirect(url_for('reservar'))
+
 @app.route('/reservas')
 def mostrar_reservas():
+    if not session.get('admin'):
+        flash("Acceso restringido. Inicia sesión como administrador.", "warning")
+        return redirect(url_for('login'))
+
     conn = get_db_connection()
     reservas = conn.execute('SELECT * FROM reservas ORDER BY fecha').fetchall()
     conn.close()
