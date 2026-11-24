@@ -133,6 +133,8 @@ def harden_responses(resp):
         "style-src 'self' https://cdn.jsdelivr.net; img-src 'self' data:; "
         "form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
     )
+    if request.path == "/login" or session.get("admin"):
+        resp.headers.setdefault("Cache-Control", "no-store")
     if os.environ.get("HSTS", "0") == "1":
         resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000")
     return resp
@@ -143,6 +145,9 @@ def login_rate_limited(key, limit=5, window_seconds=300):
     with _attempts_lock:
         recent = [t for t in _login_attempts.get(key, []) if now - t < window_seconds]
         _login_attempts[key] = recent
+        if len(_login_attempts) > 1000:
+            for ip in [k for k, value in _login_attempts.items() if not value]:
+                del _login_attempts[ip]
         if len(recent) >= limit:
             return True
         recent.append(now)
